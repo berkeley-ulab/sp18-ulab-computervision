@@ -14,9 +14,12 @@ Please fork this repository.
 
 
 ## Updating Your Forked Repository
-1. ```git remote add ulab https://github.com/wilson1.yan/SP18-ULab-Computer-Vision.git```
+1. ```git remote add ulab https://github.com/wilson1yan/SP18-ULab-Computer-Vision.git```
 1. ```git pull ulab master```
 
+## Curriculum Agenda
+### Week 1
+* Test
 
 ## Order of notebooks
 1. 
