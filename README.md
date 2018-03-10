@@ -40,6 +40,6 @@ This link has a quick start on [Keyboard navigation shortcuts](http://jupyter-no
 ## Order of notebooks
 0. NeuralStyleTransfer (demo)
 1. numpy_matplotlib
-2. autograd_tutorial
-3. pytorch
+2. pytorch
+3. autograd_tutorial
 4. introml
