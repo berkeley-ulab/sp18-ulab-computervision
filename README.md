@@ -38,4 +38,8 @@ This link has a quick start on [Keyboard navigation shortcuts](http://jupyter-no
     * Train on MNIST
 
 ## Order of notebooks
-1. 
+0. NeuralStyleTransfer (demo)
+1. numpy_matplotlib
+2. autograd_tutorial
+3. pytorch
+4. introml
