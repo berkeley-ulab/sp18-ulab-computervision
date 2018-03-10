@@ -19,7 +19,23 @@ Please fork this repository.
 
 ## Curriculum Agenda
 ### Week 1
-* Test
+* Numpy
+    * Manipulating matrices and vectors
+    * Indexing
+    * Broadcasting
+* Matplotlib
+    * Plotting images
+    * Line/scatter plots
+* Machine Learning (basics)
+    * Data - how data is stored and accessed - with particular focus on images
+    * Model
+    * Training/Testing
+* PyTorch
+    * Creating and manipulating Tensors - very similar to Numpy
+    * nn.Linear
+    * Variable and autograd
+    * Learn how to train a linear model and visualize results
+    * Train on MNIST
 
 ## Order of notebooks
 1. 
