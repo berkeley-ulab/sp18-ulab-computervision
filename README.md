@@ -14,11 +14,10 @@ Please fork this repository.
 
 
 ## Updating Your Forked Repository
-1. ```git remote add ulab https://github.com/wilson1yan/SP18-ULab-Computer-Vision.git```
+1. ```git remote add ulab https://github.com/berkeley-ulab/sp18-ulab-computervision.git```
 1. ```git pull ulab master```
 
 ## Curriculum Agenda
-### Week 1
 * Numpy
     * Manipulating matrices and vectors
     * Indexing
