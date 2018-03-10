@@ -26,16 +26,16 @@ This link has a quick start on [Keyboard navigation shortcuts](http://jupyter-no
 * Matplotlib
     * Plotting images
     * Line/scatter plots
-* Machine Learning (basics)
-    * Data - how data is stored and accessed - with particular focus on images
-    * Model
-    * Training/Testing
 * PyTorch
     * Creating and manipulating Tensors - very similar to Numpy
     * nn.Linear
     * Variable and autograd
     * Learn how to train a linear model and visualize results
-    * Train on MNIST
+* Machine Learning (basics)
+    * Data - how data is stored and accessed - with particular focus on images
+    * Model
+    * Training/Testing
+    * Train a model on MNIST
 
 ## Order of notebooks
 0. NeuralStyleTransfer (demo)
