@@ -4,10 +4,11 @@ Please fork this repository.
 
 ## Running on your own computer
 1. Fork this github repository (make sure git is setup!)
-1. `git clone [repo url]`
+1. `git clone [your forked repo url]`
+1. `cd sp18-ulab-computervision`
 1. `git remote add ulab https://github.com/berkeley-ulab/sp18-ulab-computervision.git`
 1. Setup Conda via (this link)[https://conda.io/miniconda.html]
-1. `cd setup` and execute `setup.sh`. 
+1. `cd setup` and execute `bash setup.sh`. 
 1. Run `source activate ulab`.
 1. Run `jupyter lab` in this repository.
 
