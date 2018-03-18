@@ -27,13 +27,13 @@ This link has a quick start on [Keyboard navigation shortcuts](http://jupyter-no
 * Matplotlib
     * Plotting images
     * Line/scatter plots
+* Neural Networks/Deep Learning
+    * What is a neural network?
+    * Building out your own
 * PyTorch
     * Creating and manipulating Tensors - very similar to Numpy
 * PyTorch Details: Automatic Differentitation
     * Calculating Gradients
-* Neural Networks/Deep Learning
-    * What is a neural network?
-    * Building out your own
 * (In Progress) Conv Neural Networks
     * ...
 * Gradient Descent
@@ -49,8 +49,8 @@ This link has a quick start on [Keyboard navigation shortcuts](http://jupyter-no
 ## Order of notebooks
 0. NeuralStyleTransfer (demo)
 1. numpy_matplotlib
-2. pytorch
-3. autograd_tutorial
-4. Neural Networks
+2. Neural Networks
+3. pytorch
+4. autograd_tutorial
 5. (In progress) Convolutional Neural Networks
 6. Gradient Descent
