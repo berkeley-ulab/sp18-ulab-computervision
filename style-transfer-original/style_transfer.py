@@ -55,18 +55,10 @@ def load_images():
 
 def generate_pastiche(content_image):
     """
-    Generate a random tensor of the same size as the content_image
+    Cloen the content_image
     """
     # return Variable(torch.randn(*content_image.size()), requires_grad=True)
     return Variable(content_image.data.clone(), requires_grad=True)
-
-
-def extract_vgg_features(vgg_model, input_img, layers):
-    """
-    Extracts the convolutions features from the specified layers given the model and input
-    """
-    input_img = Variable(input_img)
-    features = vgg_model(input_img, layers)
 
 
 class ContentLoss(nn.Module):
@@ -75,7 +67,7 @@ class ContentLoss(nn.Module):
         """
         Initialize anything you need here
         """
-        self.target = target.detach()
+        self.target = target
         self.weight = weight
         self.criterion = nn.MSELoss()
 
@@ -89,37 +81,33 @@ class GramMatrix(nn.Module):
         Calculate the Gram Matrix of the input features
         The input will be of size B x C x W x H. You want to resize
         the input to B x C x W*H, and find the Gram Matrix for each batch
-
-        Your Code Here
         """
 
         b, c, w, h = input.size()
         features = input.view(b, c, w*h)
         G = torch.bmm(features, features.transpose(1, 2))
-        return G.div(w*h)
+        return G.div_(w*h)
 
 
 class StyleLoss(nn.Module):
     def __init__(self, target, weight):
         super(StyleLoss, self).__init__()
-        self.target = target.detach()
+        self.target = target
         self.weight = weight
         self.gram = GramMatrix()
         self.criterion = nn.MSELoss()
 
     def forward(self, input):
-        input = input.clone()
-        G = self.gram(input) * self.weight
-        return self.criterion(G, self.target)
+        return self.criterion(self.gram(input), self.target) * self.weight
 
 
-def construct_style_loss_fns(vgg, style_image, style_layers):
-    style_targets = [GramMatrix()(A).detach() for A in vgg(style_image, style_layers)]
+def construct_style_loss_fns(vgg_model, style_image, style_layers):
+    style_targets = [GramMatrix()(A).detach() for A in vgg_model(style_image, style_layers)]
     style_weights = [1e3 / n ** 2 for n in [64, 128, 256, 512, 512]]
     return [StyleLoss(st, sw) for st, sw in zip(style_targets, style_weights)]
 
 
-def construct_content_loss_fns(vgg, content_image, content_layers):
+def construct_content_loss_fns(vgg_model, content_image, content_layers):
     content_targets = [A.detach() for A in vgg_model(content_image, content_layers)]
     content_weights = [1e0]
     return [ContentLoss(ct, cw) for ct, cw in zip(content_targets, content_weights)]
@@ -136,10 +124,10 @@ def main():
     loss_layers = style_layers + content_layers
 
     style_loss_fns = construct_style_loss_fns(vgg_model, style_image, style_layers) 
-    content_loss_fns = construct_style_loss_fns(vgg_model, content_image, content_layers)    
+    content_loss_fns = construct_content_loss_fns(vgg_model, content_image, content_layers)    
     loss_fns = style_loss_fns + content_loss_fns
 
-    max_iter, show_iter = 20, 2
+    max_iter, show_iter = 40, 2
     optimizer = optim.LBFGS([pastiche])
     n_iter = [0]
 
@@ -148,7 +136,9 @@ def main():
             optimizer.zero_grad()
             out = vgg_model(pastiche, loss_layers)
             layer_losses = [loss_fn(A) for loss_fn, A in zip(loss_fns, out)]
-            loss = sum(layer_losses)
+            style_loss, content_loss = sum(layer_losses[:-1]), sum(layer_losses[-1:])
+            print(style_loss.data[0], content_loss.data[0])
+            loss = style_loss + content_loss
             loss.backward()
             n_iter[0] += 1
             if n_iter[0] % show_iter == 0:
