@@ -45,7 +45,8 @@ def load_images():
     1) Load each image in img_paths. Use Image in the PIL library. 
     2) Apply the prep transformation to each image
     3) Convert each image from size C x W x H to 1 x C x W x H
-    4) Return a tuple of (style_image_tensor, content_image_tensor)
+    4) Wrap each Tensor in a Variable
+    5) Return a tuple of (style_image_tensor, content_image_tensor)
     """
     img_paths = [image_dir + 'vangogh_starry_night.jpg', image_dir + 'Tuebingen_Neckarfront.jpg']
     imgs = [Image.open(path) for path in img_paths]
@@ -55,9 +56,8 @@ def load_images():
 
 def generate_pastiche(content_image):
     """
-    Cloen the content_image
+    Clone the content_image and return wrapped as a Variable
     """
-    # return Variable(torch.randn(*content_image.size()), requires_grad=True)
     return Variable(content_image.data.clone(), requires_grad=True)
 
 
@@ -65,13 +65,14 @@ class ContentLoss(nn.Module):
     def __init__(self, target, weight):
         super(ContentLoss, self).__init__()
         """
-        Initialize anything you need here
+        Your Code Here
         """
         self.target = target
         self.weight = weight
         self.criterion = nn.MSELoss()
 
     def forward(self, input):
+        """ Your Code Here """
         return self.criterion(input, self.target) * self.weight
 
 
@@ -83,6 +84,7 @@ class GramMatrix(nn.Module):
         the input to B x C x W*H, and find the Gram Matrix for each batch
         """
 
+        """ Your Code Here """
         b, c, w, h = input.size()
         features = input.view(b, c, w*h)
         G = torch.bmm(features, features.transpose(1, 2))
@@ -97,7 +99,10 @@ class StyleLoss(nn.Module):
         self.gram = GramMatrix()
         self.criterion = nn.MSELoss()
 
+        """ Your Code Here """
+
     def forward(self, input):
+        """ Your Code Here """
         return self.criterion(self.gram(input), self.target) * self.weight
 
 
