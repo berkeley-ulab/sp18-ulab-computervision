@@ -60,12 +60,3 @@ class VGG(nn.Module):
         out['r54'] = F.relu(self.conv5_4(out['r53']))
         out['p5'] = self.pool5(out['r54'])
         return [out[key] for key in out_keys]
-
-def load_vgg(model_dir):
-    vgg = VGG()
-    vgg.load_state_dict(torch.load(model_dir + 'vgg_conv.pth'))
-    for param in vgg.parameters():
-        param.requires_grad = False
-    if torch.cuda.is_available():
-        vgg.cuda()
-    return vgg

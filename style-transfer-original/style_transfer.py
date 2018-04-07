@@ -14,7 +14,7 @@ from PIL import Image
 from collections import OrderedDict
 import matplotlib.pyplot as plt
 
-from vgg import load_vgg
+import vgg as v
 
 image_dir = os.getcwd() + '/Images/'
 model_dir = os.getcwd() + '/Models/'
@@ -40,12 +40,22 @@ def postp(tensor): # to clip results in the range [0,1]
     img = postpb(t)
     return img
 
+def load_vgg():
+    vgg = v.VGG()
+    vgg.load_state_dict(torch.load(model_dir + 'vgg_conv.pth'))
+    for param in vgg.parameters():
+        param.requires_grad = False
+    if torch.cuda.is_available():
+        vgg.cuda()
+    return vgg
+
 def load_images():
     """
     1) Load each image in img_paths. Use Image in the PIL library. 
-    2) Apply the prep transformation to each image
-    3) Convert each image from size C x W x H to 1 x C x W x H
-    4) Return a tuple of (style_image_tensor, content_image_tensor)
+    2) Apply the prep transformation to each image (see the variables above)
+    3) Convert each image from size C x W x H to 1 x C x W x H (same as batch size 1)
+    4) Wrap each Tensor in a Variable
+    5) Return a tuple of (style_image_tensor, content_image_tensor)
     """
     img_paths = [image_dir + 'vangogh_starry_night.jpg', image_dir + 'Tuebingen_Neckarfront.jpg']
     imgs = [Image.open(path) for path in img_paths]
@@ -55,66 +65,110 @@ def load_images():
 
 def generate_pastiche(content_image):
     """
-    Cloen the content_image
+    Clone the content_image and return wrapped as a Variable with
+    requires_grad=True
     """
-    # return Variable(torch.randn(*content_image.size()), requires_grad=True)
     return Variable(content_image.data.clone(), requires_grad=True)
 
 
 class ContentLoss(nn.Module):
     def __init__(self, target, weight):
+        """ Saves input variables and initializes objects
+
+        Keyword arguments:
+        target - the feature matrix of content_image
+        weight - the weight applied to this loss (refer to the formula)
+        """
         super(ContentLoss, self).__init__()
-        """
-        Initialize anything you need here
-        """
+
         self.target = target
         self.weight = weight
         self.criterion = nn.MSELoss()
 
-    def forward(self, input):
-        return self.criterion(input, self.target) * self.weight
+    def forward(self, x):
+        """ Calculate the content loss. Refer to the notebook for the formula.
+        
+        Keyword arguments:
+        x -- a selected output layer of feeding the pastiche through the cnn
+        """
+        return self.criterion(x, self.target) * self.weight
 
 
 class GramMatrix(nn.Module):
-    def forward(self, input):
-        """
-        Calculate the Gram Matrix of the input features
-        The input will be of size B x C x W x H. You want to resize
-        the input to B x C x W*H, and find the Gram Matrix for each batch
+    def forward(self, x):
+        """ Calculates the batchwise Gram Matrices of x. 
+
+        Keyword arguments:
+        x - a B x C x W x H sized tensor, it should be resized to B x C x W*H
         """
 
-        b, c, w, h = input.size()
-        features = input.view(b, c, w*h)
+        b, c, w, h = x.size()
+        features = x.view(b, c, w*h)
         G = torch.bmm(features, features.transpose(1, 2))
         return G.div_(w*h)
 
 
 class StyleLoss(nn.Module):
     def __init__(self, target, weight):
+        """ Saves input variables and initializes objects
+
+        Keyword arguments:
+        target - the Gram Matrix of an arbitrary layer of the cnn output for style_image 
+        weight - the weight applied to this loss (refer to the formula)
+        """
         super(StyleLoss, self).__init__()
         self.target = target
         self.weight = weight
         self.gram = GramMatrix()
         self.criterion = nn.MSELoss()
+        
 
-    def forward(self, input):
-        return self.criterion(self.gram(input), self.target) * self.weight
+    def forward(self, x):
+        """Calculates the weighted style loss. Note that we are comparing STYLE,
+        so you will need to find the Gram Matrix for x. You will not need to do so
+        for target, since it is stated that it is already a Gram Matrix.
+        
+        Keyword arguments:
+        x - features of an arbitrary cnn layer by feeding the pastiche
+        """
+        return self.criterion(self.gram(x), self.target) * self.weight
 
 
 def construct_style_loss_fns(vgg_model, style_image, style_layers):
+    """Constructs and returns a list of StyleLoss instances - one for each given style layer.
+    See vgg.py to see how to extract the given layers from the vgg model. After you've calculated 
+    the targets, make sure to detach the results by calling detach().
+
+    Keyword arguments:
+    vgg_model - the pretrained vgg model. See vgg.py for more details
+    style_image - the style image
+    style_layers - a list of layers of the cnn output we want. 
+
+    """
     style_targets = [GramMatrix()(A).detach() for A in vgg_model(style_image, style_layers)]
     style_weights = [1e3 / n ** 2 for n in [64, 128, 256, 512, 512]]
     return [StyleLoss(st, sw) for st, sw in zip(style_targets, style_weights)]
 
 
 def construct_content_loss_fns(vgg_model, content_image, content_layers):
+    """Constructs and returns a list of ContentLoss instances - one for each given content layer.
+    See vgg.py to see how to extract the given layers from the vgg model. After you've calculated 
+    the targets, make sure to detach the results by calling detach().
+
+    Keyword arguments:
+    vgg_model - the pretrained vgg model. See vgg.py for more details
+    content_image - the content image
+    content_layers - a list of layers of the cnn output we want. 
+
+    """
     content_targets = [A.detach() for A in vgg_model(content_image, content_layers)]
     content_weights = [1e0]
     return [ContentLoss(ct, cw) for ct, cw in zip(content_targets, content_weights)]
 
 
 def main():
-    vgg_model = load_vgg(model_dir)
+    """The main method for performing style transfer"""
+    vgg_model = load_vgg()
 
     style_image, content_image = load_images()
     pastiche = generate_pastiche(content_image)
