@@ -92,7 +92,9 @@ class ContentLoss(nn.Module):
 
 class GramMatrix(nn.Module):
     def forward(self, x):
-        """ Calculates the batchwise Gram Matrices of x. 
+        """ Calculates the batchwise Gram Matrices of x. You will want to
+        divide the Gram Matrices by W*H in the end. This will help keep
+        values normalized and small.
 
         Keyword arguments:
         x - a B x C x W x H sized tensor, it should be resized to B x C x W*H
