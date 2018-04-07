@@ -58,17 +58,15 @@ def load_images():
     5) Return a tuple of (style_image_tensor, content_image_tensor)
     """
     img_paths = [image_dir + 'vangogh_starry_night.jpg', image_dir + 'Tuebingen_Neckarfront.jpg']
-    imgs = [Image.open(path) for path in img_paths]
-    imgs = [prep(img).unsqueeze(0) for img in imgs]
-    imgs = [Variable(img, requires_grad=False) for img in imgs]
-    return imgs
+    
+    raise NotImplementedError()
 
 def generate_pastiche(content_image):
     """
     Clone the content_image and return wrapped as a Variable with
     requires_grad=True
     """
-    return Variable(content_image.data.clone(), requires_grad=True)
+    raise NotImplementedError()
 
 
 class ContentLoss(nn.Module):
@@ -81,9 +79,7 @@ class ContentLoss(nn.Module):
         """
         super(ContentLoss, self).__init__()
 
-        self.target = target
-        self.weight = weight
-        self.criterion = nn.MSELoss()
+        raise NotImplementedError()
 
     def forward(self, x):
         """ Calculate the content loss. Refer to the notebook for the formula.
@@ -91,7 +87,7 @@ class ContentLoss(nn.Module):
         Keyword arguments:
         x -- a selected output layer of feeding the pastiche through the cnn
         """
-        return self.criterion(x, self.target) * self.weight
+        raise NotImplementedError()
 
 
 class GramMatrix(nn.Module):
@@ -102,10 +98,7 @@ class GramMatrix(nn.Module):
         x - a B x C x W x H sized tensor, it should be resized to B x C x W*H
         """
 
-        b, c, w, h = x.size()
-        features = x.view(b, c, w*h)
-        G = torch.bmm(features, features.transpose(1, 2))
-        return G.div_(w*h)
+        raise NotImplementedError()
 
 
 class StyleLoss(nn.Module):
@@ -117,10 +110,8 @@ class StyleLoss(nn.Module):
         weight - the weight applied to this loss (refer to the formula)
         """
         super(StyleLoss, self).__init__()
-        self.target = target
-        self.weight = weight
-        self.gram = GramMatrix()
-        self.criterion = nn.MSELoss()
+
+        raise NotImplementedError()
         
 
     def forward(self, x):
@@ -131,7 +122,7 @@ class StyleLoss(nn.Module):
         Keyword arguments:
         x - features of an arbitrary cnn layer by feeding the pastiche
         """
-        return self.criterion(self.gram(x), self.target) * self.weight
+        raise NotImplementedError()
 
 
 def construct_style_loss_fns(vgg_model, style_image, style_layers):
@@ -145,9 +136,7 @@ def construct_style_loss_fns(vgg_model, style_image, style_layers):
     style_layers - a list of layers of the cnn output we want. 
 
     """
-    style_targets = [GramMatrix()(A).detach() for A in vgg_model(style_image, style_layers)]
-    style_weights = [1e3 / n ** 2 for n in [64, 128, 256, 512, 512]]
-    return [StyleLoss(st, sw) for st, sw in zip(style_targets, style_weights)]
+    raise NotImplementedError()
 
 
 def construct_content_loss_fns(vgg_model, content_image, content_layers):
@@ -161,25 +150,18 @@ def construct_content_loss_fns(vgg_model, content_image, content_layers):
     content_layers - a list of layers of the cnn output we want. 
 
     """
-    content_targets = [A.detach() for A in vgg_model(content_image, content_layers)]
-    content_weights = [1e0]
-    return [ContentLoss(ct, cw) for ct, cw in zip(content_targets, content_weights)]
+    raise NotImplementedError()
 
 
 def main():
     """The main method for performing style transfer"""
-    vgg_model = load_vgg()
-
-    style_image, content_image = load_images()
-    pastiche = generate_pastiche(content_image)
-
     style_layers = ['r11','r21','r31','r41', 'r51'] 
     content_layers = ['r42']
     loss_layers = style_layers + content_layers
 
-    style_loss_fns = construct_style_loss_fns(vgg_model, style_image, style_layers) 
-    content_loss_fns = construct_content_loss_fns(vgg_model, content_image, content_layers)    
-    loss_fns = style_loss_fns + content_loss_fns
+    # Load up all of the style, content, and pastiche Image
+    # Construct the loss functions
+    raise NotImplementedError()
 
     max_iter, show_iter = 40, 2
     optimizer = optim.LBFGS([pastiche])
@@ -187,13 +169,10 @@ def main():
 
     while n_iter[0] <= max_iter:
         def closure():
-            optimizer.zero_grad()
-            out = vgg_model(pastiche, loss_layers)
-            layer_losses = [loss_fn(A) for loss_fn, A in zip(loss_fns, out)]
-            style_loss, content_loss = sum(layer_losses[:-1]), sum(layer_losses[-1:])
-            print(style_loss.data[0], content_loss.data[0])
-            loss = style_loss + content_loss
-            loss.backward()
+            
+            # Implement the optimization step
+            raise NotImplementedError()
+
             n_iter[0] += 1
             if n_iter[0] % show_iter == 0:
                 print('Iteration: %d, loss: %f' % (n_iter[0], loss.data[0]))
