@@ -132,6 +132,7 @@ def main():
     content_layers = ['r42']
     loss_layers = style_layers + content_layers
 
+    vgg_model = utils.load_vgg()
     # Load up all of the style, content, and pastiche Image
     # Construct the loss functions
     raise NotImplementedError

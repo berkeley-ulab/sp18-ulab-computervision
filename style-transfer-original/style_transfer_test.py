@@ -6,6 +6,7 @@ import numpy as np
 
 import style_transfer as st
 from vgg import *
+import utils
 
 
 def test_load_images():
@@ -69,7 +70,7 @@ def test_StyleLoss():
 
 
 def test_construct_style_loss_fns():
-    vgg_model = st.load_vgg()
+    vgg_model = utils.load_vgg()
     style_image, content_image = st.load_images()
     pastiche = st.generate_pastiche(content_image)
     style_layers = ['r11','r21','r31','r41', 'r51'] 
@@ -86,7 +87,7 @@ def test_construct_style_loss_fns():
 
 def test_construct_content_loss_fns():
     torch.manual_seed(0)
-    vgg_model = st.load_vgg()
+    vgg_model = utils.load_vgg()
     style_image, content_image = st.load_images()
     pastiche = st.generate_pastiche(content_image) + Variable(torch.randn(*content_image.size()))
     content_layers = ['r42']
