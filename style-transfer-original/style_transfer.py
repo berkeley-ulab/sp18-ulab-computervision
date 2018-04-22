@@ -100,7 +100,9 @@ class StyleLoss(nn.Module):
 def construct_style_loss_fns(vgg_model, style_image, style_layers):
     """Constructs and returns a list of StyleLoss instances - one for each given style layer.
     See vgg.py to see how to extract the given layers from the vgg model. After you've calculated
-    the targets, make sure to detach the results by calling detach().
+    the targets, make sure to detach the results by calling detach(). Also make sure your output
+    StyleLoss objects are in order of the style_layers. For the contents of 
+    style_layers, see the style_layers object in main()
 
     Keyword arguments:
     vgg_model - the pretrained vgg model. See vgg.py for more details
@@ -114,7 +116,8 @@ def construct_style_loss_fns(vgg_model, style_image, style_layers):
 def construct_content_loss_fns(vgg_model, content_image, content_layers):
     """Constructs and returns a list of ContentLoss instances - one for each given content layer.
     See vgg.py to see how to extract the given layers from the vgg model. After you've calculated
-    the targets, make sure to detach the results by calling detach().
+    the targets, make sure to detach the results by calling detach(). For info on the
+    contents of content_layer, see content_layers in main()
 
     Keyword arguments:
     vgg_model - the pretrained vgg model. See vgg.py for more details
